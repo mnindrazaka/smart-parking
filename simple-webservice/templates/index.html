@@ -6,17 +6,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Smart Parking</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}" />
 </head>
 
 <body>
-  <div id="remains"></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+
+
+  <div class="card text-center">
+    <div class="card-body">
+      <h4 class="card-title">Remaining Parking Slot</h4>
+      <h2 class="card-text" id="remains"></h2>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='jquery-3.3.1.js') }}"></script>
+  <script src="{{ url_for('static', filename='socket.io.js') }}"></script>
   <script>
     $(document).ready(function () {
       var socket = io.connect('http://' + document.domain + ':' + location.port + '/');
       socket.on('update remains', function (data) {
-        $('#remains').append('<p>Received: ' + data.count + '</p>');
+        $('#remains').html(data.count);
       });
     });
   </script>

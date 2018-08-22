@@ -7,7 +7,7 @@ socketio = SocketIO(app)
 
 
 parking = {
-    "max": 6,
+    "max": 4,
     "current": 0
 }
 
@@ -54,4 +54,4 @@ def sendData():
     emit("update remains", {"count": getRemains()})
 
 
-app.run(host='0.0.0.0')
+app.run(host='0.0.0.0', debug=True)
