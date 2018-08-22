@@ -1,41 +1,57 @@
-from flask import Flask, jsonify
-
+from flask import Flask, jsonify, render_template
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
 
 
-parkir = {
-    "jumlah_total": 6,
-    "jumlah_sekarang": 0
+parking = {
+    "max": 6,
+    "current": 0
 }
 
 
-def get_sisa():
-    return parkir['jumlah_total'] - parkir['jumlah_sekarang']
+def getRemains():
+    return parking['max'] - parking['current']
 
 
-@app.route("/total")
-def total():
-    return jsonify({"total": parkir['jumlah_total']})
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
-@app.route("/sisa")
-def sisa():
-    return jsonify({"sisa": get_sisa()})
+@app.route("/max")
+def max():
+    return jsonify({"remains": parking['max']})
 
 
-@app.route("/masuk")
-def masuk():
-    if parkir['jumlah_sekarang'] < parkir['jumlah_total']:
-        parkir['jumlah_sekarang'] += 1
-    return jsonify({"sisa": get_sisa()})
+@app.route("/remains")
+def remains():
+    return jsonify({"remains": getRemains()})
 
 
-@app.route("/keluar")
-def keluar():
-    if parkir['jumlah_sekarang'] > 0:
-        parkir['jumlah_sekarang'] -= 1
-    return jsonify({"sisa": get_sisa()})
+@app.route("/enter")
+def enter():
+    if parking['current'] < parking['max']:
+        parking['current'] += 1
+
+    socketio.emit("update remains", {"count": getRemains()})
+    return jsonify({"remains": getRemains()})
 
 
-app.run()
+@app.route("/exit")
+def exit():
+    if parking['current'] > 0:
+        parking['current'] -= 1
+
+    socketio.emit("update remains", {"count": getRemains()})
+    return jsonify({"remains": getRemains()})
+
+
+@socketio.on('connect', namespace='/')
+def sendData():
+    emit("update remains", {"count": getRemains()})
+
+
+app.run(host='0.0.0.0')
